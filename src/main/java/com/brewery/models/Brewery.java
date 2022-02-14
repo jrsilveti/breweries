@@ -1,4 +1,4 @@
-package java.com.brewery.breweries.models;
+package com.brewery.models;
 
 import java.util.Date;
 

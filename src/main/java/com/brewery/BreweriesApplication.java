@@ -1,4 +1,4 @@
-package com.brewery.breweries;
+package com.brewery;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
