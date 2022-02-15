@@ -19,10 +19,7 @@ public class BreweryController {
     @GetMapping("/list")
     public List<Brewery> getBreweryList() {
         List<Brewery> breweryList;
-
         breweryList = breweryService.getBreweryList();
-
-        //add error handling for this endpoint
 
         return breweryList;
     }

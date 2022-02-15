@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.6.3'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id "io.freefair.lombok" version "6.4.0"
 }
 
 group = 'com.brewery'
@@ -19,6 +20,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
+	testImplementation 'org.mockito:mockito-core:4.3.1'
+
 }
 
 tasks.named('test') {
