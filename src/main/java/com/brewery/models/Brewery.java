@@ -1,24 +1,27 @@
 package com.brewery.models;
 
+import lombok.Data;
+
 import java.util.Date;
 
+@Data
 public class Brewery{
-    public String id;
-    public String name;
-    public String brewery_type;
-    public String street;
-    public String address_2;
-    public String address_3;
-    public String city;
-    public String state;
-    public String county_province;
-    public String postal_code;
-    public String country;
-    public String longitude;
-    public String latitude;
-    public String phone;
-    public String website_url;
-    public Date updated_at;
-    public Date created_at;
+    private String id;
+    private String name;
+    private String brewery_type;
+    private String street;
+    private String address_2;
+    private String address_3;
+    private String city;
+    private String state;
+    private String county_province;
+    private String postal_code;
+    private String country;
+    private String longitude;
+    private String latitude;
+    private String phone;
+    private String website_url;
+    private Date updated_at;
+    private Date created_at;
 }
 

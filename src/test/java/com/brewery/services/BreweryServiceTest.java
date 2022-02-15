@@ -54,7 +54,6 @@ public class BreweryServiceTest {
     public void testGetBreweryList() throws IOException {
         stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
         List<Brewery> resultList = breweryService.getBreweryList();
-        System.out.println(resultList.get(0).name);
         Assertions.assertNotNull(resultList);
     }
 }
