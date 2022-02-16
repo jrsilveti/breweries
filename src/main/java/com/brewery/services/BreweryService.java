@@ -1,7 +1,6 @@
 package com.brewery.services;
 
 import com.brewery.models.Brewery;
-import com.sun.jndi.toolkit.url.Uri;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -10,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,7 +39,7 @@ public class BreweryService {
                 }).block();
     }
 
-    public List<Brewery> getBrewery(String name) {
+    public List<Brewery> searchBreweries(String name) {
         UriComponents breweryUriBuilder = UriComponentsBuilder.fromUri(URI.create(breweryDBUrl)).queryParam("by_name", name).build();
         List<Brewery> breweryList = breweryDBClient.get()
                 .uri(breweryUriBuilder.toString())
@@ -60,5 +58,15 @@ public class BreweryService {
         } else {
             throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         }
+    }
+
+    public Brewery getBrewery(String name) {
+        List<Brewery> resultList = searchBreweries(name);
+        for(Brewery brewery: resultList) {
+            if(brewery.getName().equals(name)) {
+                return brewery;
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 }

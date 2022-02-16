@@ -78,13 +78,13 @@ public class BreweryServiceTest {
     @Test
     public void testGetBreweries() throws IOException {
         stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
-        List<Brewery> resultList = breweryService.getBrewery("dog");
+        List<Brewery> resultList = breweryService.searchBreweries("dog");
         Assertions.assertNotNull(resultList);
     }
 
     @Test
     public void testGetBreweries204() {
         stubForGetBreweriesEmpty();
-        Assertions.assertThrows(ResponseStatusException.class, () -> breweryService.getBrewery("dog"));
+        Assertions.assertThrows(ResponseStatusException.class, () -> breweryService.searchBreweries("dog"));
     }
 }

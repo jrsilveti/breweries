@@ -27,18 +27,11 @@ public class BreweryController {
 
     @GetMapping("/breweries")
     public List<Brewery> getBreweries(@RequestParam String name) {
-        return breweryService.getBrewery(name);
+        return breweryService.searchBreweries(name);
     }
 
     @GetMapping("/brewery")
     public Brewery getBrewery(@RequestParam String name) {
-        List<Brewery> resultList = breweryService.getBrewery(name);
-        for(Brewery brewery: resultList) {
-            if(brewery.getName().equals(name)) {
-                return brewery;
-            }
-        }
-
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        return breweryService.getBrewery(name);
     }
 }
