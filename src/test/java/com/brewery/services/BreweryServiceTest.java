@@ -24,7 +24,8 @@ import java.util.List;
 public class BreweryServiceTest {
 
     private static final String BREWERIES_PATH = "/breweries",
-            BREWERY_PATH = "/breweries?by_name=dog";
+            BREWERY_PATH = "/breweries?by_name=dog",
+            SPECIFIC_BREWERY_PATH = "/breweries?by_name=2%20Dogz%20and%20A%20Guy%20Brewing";
 
     WireMockServer wireMockServer;
 
@@ -55,15 +56,15 @@ public class BreweryServiceTest {
                         .withBody(response)));
     }
 
-    private void stubForGetBreweries(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+    private void stubForGetBreweries(String response, String path) {
+        wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
     }
 
-    private void stubForGetBreweriesEmpty() {
-        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+    private void stubForGetBreweriesEmpty(String path) {
+        wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
@@ -76,15 +77,32 @@ public class BreweryServiceTest {
     }
 
     @Test
-    public void testGetBreweries() throws IOException {
-        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+    public void testSearchBreweries() throws IOException {
+        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8), BREWERY_PATH);
         List<Brewery> resultList = breweryService.searchBreweries("dog");
         Assertions.assertNotNull(resultList);
     }
 
     @Test
-    public void testGetBreweries204() {
-        stubForGetBreweriesEmpty();
+    public void testSearchBreweries204() {
+        stubForGetBreweriesEmpty(BREWERY_PATH);
         Assertions.assertThrows(ResponseStatusException.class, () -> breweryService.searchBreweries("dog"));
     }
+
+    @Test
+    public void testGetBrewery() throws IOException {
+        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
+                SPECIFIC_BREWERY_PATH);
+        Brewery resultBrewery = breweryService.getBrewery("2 Dogz and A Guy Brewing");
+        Assertions.assertNotNull(resultBrewery);
+        Assertions.assertEquals("2 Dogz and A Guy Brewing", resultBrewery.getName());
+    }
+
+    @Test
+    public void testGetBrewery204() {
+        stubForGetBreweriesEmpty(SPECIFIC_BREWERY_PATH);
+        Assertions.assertThrows(ResponseStatusException.class,
+                () -> breweryService.searchBreweries("2 Dogz and A Guy Brewing"));
+    }
+
 }
