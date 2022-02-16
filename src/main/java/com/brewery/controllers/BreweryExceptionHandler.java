@@ -17,7 +17,9 @@ public class BreweryExceptionHandler extends ResponseEntityExceptionHandler {
         if(exception.getStatus().is5xxServerError()) {
             error.setStatus(500);
             error.setMessage("The server cannot be reached");
+        } else if (exception.getStatus().equals(HttpStatus.NO_CONTENT)){
+            error.setStatus(204);
         }
-        return new ResponseEntity<>(error, HttpStatus.valueOf(500));
+        return new ResponseEntity<>(error, HttpStatus.valueOf(error.getStatus()));
     }
 }

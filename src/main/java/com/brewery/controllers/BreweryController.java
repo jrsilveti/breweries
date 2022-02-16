@@ -5,12 +5,12 @@ import com.brewery.services.BreweryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/breweries")
 public class BreweryController {
 
     @Autowired
@@ -22,5 +22,10 @@ public class BreweryController {
         breweryList = breweryService.getBreweryList();
 
         return breweryList;
+    }
+
+    @GetMapping("/breweries")
+    public List<Brewery> getBreweryByName(@RequestParam String name) {
+        return breweryService.getBrewery(name);
     }
 }

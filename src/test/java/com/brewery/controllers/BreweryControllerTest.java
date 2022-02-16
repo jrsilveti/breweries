@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 @AutoConfigureMockMvc
 public class BreweryControllerTest {
 
-    private static final String BREWERIES_LIST_PATH = "/breweries/list",
+    private static final String BREWERIES_LIST_PATH = "/list",
     BREWERIES_PATH = "/breweries";
 
     WireMockServer wireMockServer;
