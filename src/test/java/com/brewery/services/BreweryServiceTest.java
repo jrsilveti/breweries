@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +24,7 @@ import java.util.List;
 public class BreweryServiceTest {
 
     private static final String BREWERIES_PATH = "/breweries",
-    BREWERY_PATH = "/breweries?by_name=dog";
+            BREWERY_PATH = "/breweries?by_name=dog";
 
     WireMockServer wireMockServer;
 
@@ -61,6 +62,12 @@ public class BreweryServiceTest {
                         .withBody(response)));
     }
 
+    public void stubForGetBreweriesEmpty() {
+        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
     @Test
     public void testGetBreweryList() throws IOException {
         stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
@@ -73,5 +80,11 @@ public class BreweryServiceTest {
         stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
         List<Brewery> resultList = breweryService.getBrewery("dog");
         Assertions.assertNotNull(resultList);
+    }
+
+    @Test
+    public void testGetBreweries204() {
+        stubForGetBreweriesEmpty();
+        Assertions.assertThrows(ResponseStatusException.class, () -> breweryService.getBrewery("dog"));
     }
 }
