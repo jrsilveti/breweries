@@ -48,35 +48,16 @@ public class BreweryControllerTest {
         wireMockServer.stop();
     }
 
-    private void stubForGetBreweryList(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
+    private void stubOpenBreweryDBCall(String response, String path, int status) {
+        wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(response)));
+                        .withBody(response)
+                        .withStatus(status)));
     }
 
-    private void stubForGetBreweryList500() {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
-                .willReturn(WireMock.aResponse()
-                        .withStatus(500)));
-    }
-
-    private void stubForGetBreweriesEmpty() {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
-                .willReturn(WireMock.aResponse()
-                        .withBody("")
-                        .withStatus(200)));
-    }
-
-    private void stubForGetBreweries(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_NAME_PATH)
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(response)));
-    }
-
-    private void stubForGetBrewery(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERY_NAME_PATH)
+    private void stubOpenBreweryDBCall(String response, String path) {
+        wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
@@ -87,35 +68,37 @@ public class BreweryControllerTest {
 
     @Test
     public void testGetBreweriesSuccess() throws Exception {
-        stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8),
+                BREWERIES_PATH);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 
     @Test
     public void testGetBreweries500() throws Exception {
-        stubForGetBreweryList500();
+        stubOpenBreweryDBCall("", BREWERIES_PATH, 500);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
                 .andExpect(MockMvcResultMatchers.status().is5xxServerError()).andReturn();
     }
 
     @Test
     public void testGetBreweries400() throws Exception {
-        stubForGetBreweriesEmpty();
+        stubOpenBreweryDBCall("", BREWERIES_PATH);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
     }
 
     @Test
     public void testGetBreweries() throws Exception {
-        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8), BREWERIES_NAME_PATH);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH).queryParam("name", "dog"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 
     @Test
     public void testGetBrewery() throws Exception {
-        stubForGetBrewery(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
+                BREWERY_NAME_PATH);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERY_PATH).queryParam("name", "2 Dogz and A Guy Brewing"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
