@@ -14,9 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
@@ -25,13 +23,19 @@ import java.nio.charset.StandardCharsets;
 @AutoConfigureMockMvc
 public class BreweryControllerTest {
 
-    private static final String BREWERIES_LIST_PATH = "/breweries/list",
-    BREWERIES_PATH = "/breweries";
+    private static final String BREWERIES_LIST_PATH = "/list",
+            BREWERIES_PATH = "/breweries",
+            BREWERIES_NAME_PATH = "/breweries?by_name=dog",
+            BREWERY_PATH = "/brewery",
+            BREWERY_NAME_PATH = "/breweries?by_name=2%20Dogz%20and%20A%20Guy%20Brewing";
 
     WireMockServer wireMockServer;
 
     @Value("classpath:fixtures/responses/brewery_list_response.json")
     Resource breweryListResource;
+
+    @Value("classpath:fixtures/responses/breweries_response.json")
+    Resource breweriesResource;
 
     @BeforeEach
     public void setup() {
@@ -44,17 +48,19 @@ public class BreweryControllerTest {
         wireMockServer.stop();
     }
 
-    public void stubForGetBreweryList(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
+    private void stubOpenBreweryDBCall(String response, String path, int status) {
+        wireMockServer.stubFor(WireMock.get(path)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(response)
+                        .withStatus(status)));
+    }
+
+    private void stubOpenBreweryDBCall(String response, String path) {
+        wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
-    }
-
-    public void stubForGetBreweryList500() {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
-                .willReturn(WireMock.aResponse()
-                        .withStatus(500)));
     }
 
     @Autowired
@@ -62,15 +68,38 @@ public class BreweryControllerTest {
 
     @Test
     public void testGetBreweriesSuccess() throws Exception {
-        stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8),
+                BREWERIES_PATH);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 
     @Test
     public void testGetBreweries500() throws Exception {
-        stubForGetBreweryList500();
+        stubOpenBreweryDBCall("", BREWERIES_PATH, 500);
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError()).andReturn();
+    }
+
+    @Test
+    public void testGetBreweries400() throws Exception {
+        stubOpenBreweryDBCall("", BREWERIES_PATH);
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
+    }
+
+    @Test
+    public void testGetBreweries() throws Exception {
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8), BREWERIES_NAME_PATH);
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH).queryParam("name", "dog"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testGetBrewery() throws Exception {
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
+                BREWERY_NAME_PATH);
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERY_PATH).queryParam("name", "2 Dogz and A Guy Brewing"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 }
