@@ -49,49 +49,38 @@ public class BreweryServiceTest {
         wireMockServer.stop();
     }
 
-    private void stubForGetBreweryList(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(response)));
-    }
-
-    private void stubForGetBreweries(String response, String path) {
+    private void stubOpenBreweryDBCall(String response, String path) {
         wireMockServer.stubFor(WireMock.get(path)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
-    }
-
-    private void stubForGetBreweriesEmpty(String path) {
-        wireMockServer.stubFor(WireMock.get(path)
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
     @Test
     public void testGetBreweryList() throws IOException {
-        stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8),
+                BREWERIES_PATH);
         List<Brewery> resultList = breweryService.getBreweryList();
         Assertions.assertNotNull(resultList);
     }
 
     @Test
     public void testSearchBreweries() throws IOException {
-        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8), BREWERY_PATH);
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
+                BREWERY_PATH);
         List<Brewery> resultList = breweryService.searchBreweries("dog");
         Assertions.assertNotNull(resultList);
     }
 
     @Test
     public void testSearchBreweries204() {
-        stubForGetBreweriesEmpty(BREWERY_PATH);
+        stubOpenBreweryDBCall("", BREWERY_PATH);
         Assertions.assertThrows(ResponseStatusException.class, () -> breweryService.searchBreweries("dog"));
     }
 
     @Test
     public void testGetBrewery() throws IOException {
-        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
+        stubOpenBreweryDBCall(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8),
                 SPECIFIC_BREWERY_PATH);
         Brewery resultBrewery = breweryService.getBrewery("2 Dogz and A Guy Brewing");
         Assertions.assertNotNull(resultBrewery);
@@ -100,7 +89,7 @@ public class BreweryServiceTest {
 
     @Test
     public void testGetBrewery204() {
-        stubForGetBreweriesEmpty(SPECIFIC_BREWERY_PATH);
+        stubOpenBreweryDBCall("", SPECIFIC_BREWERY_PATH);
         Assertions.assertThrows(ResponseStatusException.class,
                 () -> breweryService.searchBreweries("2 Dogz and A Guy Brewing"));
     }
