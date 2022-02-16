@@ -14,9 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
@@ -61,6 +59,13 @@ public class BreweryControllerTest {
                         .withStatus(500)));
     }
 
+    private void stubForGetBreweriesEmpty() {
+        wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
+                .willReturn(WireMock.aResponse()
+                        .withBody("")
+                        .withStatus(200)));
+    }
+
     private void stubForGetBreweries(String response) {
         wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
                 .willReturn(WireMock.aResponse()
@@ -82,7 +87,14 @@ public class BreweryControllerTest {
     public void testGetBreweries500() throws Exception {
         stubForGetBreweryList500();
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is5xxServerError()).andReturn();
+    }
+
+    @Test
+    public void testGetBreweries400() throws Exception {
+        stubForGetBreweriesEmpty();
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
     }
 
     @Test
