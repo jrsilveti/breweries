@@ -25,7 +25,9 @@ public class BreweryControllerTest {
 
     private static final String BREWERIES_LIST_PATH = "/list",
             BREWERIES_PATH = "/breweries",
-            BREWERY_PATH = "/breweries?by_name=dog";
+            BREWERIES_NAME_PATH = "/breweries?by_name=dog",
+            BREWERY_PATH = "/brewery",
+            BREWERY_NAME_PATH = "/breweries?by_name=2%20Dogz%20and%20A%20Guy%20Brewing";
 
     WireMockServer wireMockServer;
 
@@ -67,7 +69,14 @@ public class BreweryControllerTest {
     }
 
     private void stubForGetBreweries(String response) {
-        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+        wireMockServer.stubFor(WireMock.get(BREWERIES_NAME_PATH)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(response)));
+    }
+
+    private void stubForGetBrewery(String response) {
+        wireMockServer.stubFor(WireMock.get(BREWERY_NAME_PATH)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
@@ -98,9 +107,16 @@ public class BreweryControllerTest {
     }
 
     @Test
-    public void testGetBrewery() throws Exception {
+    public void testGetBreweries() throws Exception {
         stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH).queryParam("name", "dog"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testGetBrewery() throws Exception {
+        stubForGetBrewery(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERY_PATH).queryParam("name", "2 Dogz and A Guy Brewing"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 }
