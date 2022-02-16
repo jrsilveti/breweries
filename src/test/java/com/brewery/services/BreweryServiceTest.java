@@ -22,7 +22,8 @@ import java.util.List;
 @SpringBootTest(classes = {BreweryService.class})
 public class BreweryServiceTest {
 
-    private static final String BREWERIES_PATH = "/breweries";
+    private static final String BREWERIES_PATH = "/breweries",
+    BREWERY_PATH = "/breweries?by_name=dog";
 
     WireMockServer wireMockServer;
 
@@ -31,6 +32,9 @@ public class BreweryServiceTest {
 
     @Value("classpath:fixtures/responses/brewery_list_response.json")
     Resource breweryListResource;
+
+    @Value("classpath:fixtures/responses/breweries_response.json")
+    Resource breweriesResource;
 
     @BeforeEach
     public void setup() {
@@ -50,10 +54,24 @@ public class BreweryServiceTest {
                         .withBody(response)));
     }
 
+    public void stubForGetBreweries(String response) {
+        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(response)));
+    }
+
     @Test
     public void testGetBreweryList() throws IOException {
         stubForGetBreweryList(FileUtils.readFileToString(breweryListResource.getFile(), StandardCharsets.UTF_8));
         List<Brewery> resultList = breweryService.getBreweryList();
+        Assertions.assertNotNull(resultList);
+    }
+
+    @Test
+    public void testGetBreweries() throws IOException {
+        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+        List<Brewery> resultList = breweryService.getBrewery("dog");
         Assertions.assertNotNull(resultList);
     }
 }
