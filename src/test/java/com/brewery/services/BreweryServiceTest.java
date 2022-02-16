@@ -48,21 +48,21 @@ public class BreweryServiceTest {
         wireMockServer.stop();
     }
 
-    public void stubForGetBreweryList(String response) {
+    private void stubForGetBreweryList(String response) {
         wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
     }
 
-    public void stubForGetBreweries(String response) {
+    private void stubForGetBreweries(String response) {
         wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
     }
 
-    public void stubForGetBreweriesEmpty() {
+    private void stubForGetBreweriesEmpty() {
         wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));

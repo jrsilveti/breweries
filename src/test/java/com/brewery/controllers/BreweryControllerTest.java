@@ -26,12 +26,16 @@ import java.nio.charset.StandardCharsets;
 public class BreweryControllerTest {
 
     private static final String BREWERIES_LIST_PATH = "/list",
-    BREWERIES_PATH = "/breweries";
+            BREWERIES_PATH = "/breweries",
+            BREWERY_PATH = "/breweries?by_name=dog";
 
     WireMockServer wireMockServer;
 
     @Value("classpath:fixtures/responses/brewery_list_response.json")
     Resource breweryListResource;
+
+    @Value("classpath:fixtures/responses/breweries_response.json")
+    Resource breweriesResource;
 
     @BeforeEach
     public void setup() {
@@ -44,17 +48,24 @@ public class BreweryControllerTest {
         wireMockServer.stop();
     }
 
-    public void stubForGetBreweryList(String response) {
+    private void stubForGetBreweryList(String response) {
         wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(response)));
     }
 
-    public void stubForGetBreweryList500() {
+    private void stubForGetBreweryList500() {
         wireMockServer.stubFor(WireMock.get(BREWERIES_PATH)
                 .willReturn(WireMock.aResponse()
                         .withStatus(500)));
+    }
+
+    private void stubForGetBreweries(String response) {
+        wireMockServer.stubFor(WireMock.get(BREWERY_PATH)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(response)));
     }
 
     @Autowired
@@ -72,5 +83,12 @@ public class BreweryControllerTest {
         stubForGetBreweryList500();
         mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_LIST_PATH))
                 .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+    }
+
+    @Test
+    public void testGetBrewery() throws Exception {
+        stubForGetBreweries(FileUtils.readFileToString(breweriesResource.getFile(), StandardCharsets.UTF_8));
+        mockMvc.perform(MockMvcRequestBuilders.get(BREWERIES_PATH).queryParam("name", "dog"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 }
