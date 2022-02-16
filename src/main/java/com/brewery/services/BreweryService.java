@@ -56,7 +56,7 @@ public class BreweryService {
         if(breweryList != null && !breweryList.isEmpty()) {
             return breweryList;
         } else {
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No breweries found for that name");
         }
     }
 
@@ -67,6 +67,6 @@ public class BreweryService {
                 return brewery;
             }
         }
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No breweries found for that name");
     }
 }
